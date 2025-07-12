@@ -53,6 +53,22 @@ const auth = async (req, res, next) => {
   }
 }
 
+// --------------------------------------------------------------------------
+// 기본 할 일 생성 함수
+
+const createDefaultTodos = async (userId) => {
+  try {
+    const defaultTodos = [
+      { userId, todo: 'Todo List API 시작하기', completed: false },
+      { userId, todo: '첫 번째 할 일 추가하기', completed: false },
+    ]
+
+    await Todo.insertMany(defaultTodos)
+  } catch (error) {
+    console.error('기본 할 일 생성 중 오류 발생:', error)
+  }
+}
+
 
 // --------------------------------------------------------------------------
 // 사용자 생성
@@ -63,6 +79,7 @@ app.post('/register', async (req, res) => {
 
   try {
     const user = await User.create({ email, password: hash })
+    await createDefaultTodos(user._id)
     res.json({ message: MESSAGES.register.success })
   } catch {
     res.status(400).json({ message: MESSAGES.register.failed })
