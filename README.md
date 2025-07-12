@@ -28,7 +28,7 @@ API 사용 중 궁금한 점이나 버그가 있다면 [개발자](mailto:yamoo9
 
 ### 인증(Authentication)
 
-회원가입/로그인 이후, 발급받은 JWT 토큰을 `Authorization` 헤더에 포함해야 합니다.  
+로그인 이후 발급받은 JWT 토큰을 `Authorization` 헤더에 포함해야 합니다.  
 
 ```sh
 # <token> 위치에 토큰 값 입력
@@ -38,9 +38,9 @@ Authorization: Bearer <token>
 
 
 
-## 회원가입(Register)
+## 사용자 생성
 
-API를 사용하려면 먼저 회원가입이 필요합니다.
+API를 사용하려면 먼저 사용자를 생성해야 합니다.
 
 ### 엔드포인트(Endpoint)
 
@@ -72,9 +72,9 @@ await register('user@example.com', '1234')
 
 
 
-## 로그인
+## 사용자 로그인
 
-회원가입 및 로그인 인증 후, API를 사용할 수 있습니다.
+로그인 인증 후 API를 사용할 수 있습니다.
 
 ### 엔드포인트
 
@@ -93,7 +93,6 @@ await register('user@example.com', '1234')
 
 ```js
 await login('user@example.com', '1234')
-// 로그인 성공 시 token 변수에 JWT가 저장됨
 ```
 
 #### 응답 예시
@@ -108,40 +107,59 @@ await login('user@example.com', '1234')
 
 
 
-## 할 일 목록 조회
+## 가입된 사용자 조회
 
-인증된 사용자의 할 일 목록(To do List)을 API에서 가져옵니다.
+생성된 계정이 존재하는지 확인할 수 있습니다.
 
-### 엔드포인트 
+### 엔드포인트
 
-> GET `/todos`
-
-#### 헤더
-
-인증된 사용자의 토큰이 필요합니다.
-
-```sh
-Authorization: Bearer <token>
-```
+> GET `/users/:email`
 
 #### 예시 코드
 
 ```js
-await getTodos()
+await getUser('user@example.com', '1234')
 ```
 
 #### 응답 예시
 
-```js
-[
-  {
-    "_id": "6871b8e863fa...",
-    "userId": "6871b8b063fa...",
-    "todo": "학습을 위한 Todo List API 서버 만들기",
-    "completed": false,
+```json
+{
+  "user": {
+    "_id": "6871b8b063fa...",
+    "email": "yamoo9@naver.com"
   },
-  // ...
-]
+  "message": "가입된 사용자입니다."
+}
+```
+
+
+
+
+## 가입된 사용자 삭제
+
+가입된 사용자 계정을 삭제합니다.
+
+### 엔드포인트
+
+> DELETE `/users/:email`
+
+#### 예시 코드
+
+```js
+await deleteUser('user@example.com')
+```
+
+#### 응답 예시
+
+```json
+{
+  "deletedUser": {
+    "_id": "68720b29cf7002a...",
+    "email": "yamoo9@naver.com"
+  },
+  "message": "사용자 정보 및 작성한 모두 할 일이 삭제되었습니다."
+}
 ```
 
 
@@ -189,6 +207,45 @@ await addTodo('운동하기')
   },
   "message": "새 할 일이 목록에 추가되었습니다."
 }
+```
+
+
+
+
+## 할 일 목록 조회
+
+인증된 사용자의 할 일 목록(To do List)을 API에서 가져옵니다.
+
+### 엔드포인트 
+
+> GET `/todos`
+
+#### 헤더
+
+인증된 사용자의 토큰이 필요합니다.
+
+```sh
+Authorization: Bearer <token>
+```
+
+#### 예시 코드
+
+```js
+await getTodos()
+```
+
+#### 응답 예시
+
+```js
+[
+  {
+    "_id": "6871b8e863fa...",
+    "userId": "6871b8b063fa...",
+    "todo": "학습을 위한 Todo List API 서버 만들기",
+    "completed": false,
+  },
+  // ...
+]
 ```
 
 

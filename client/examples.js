@@ -1,8 +1,17 @@
-// 회원가입
+// 사용자 생성
 await register('test@example.com', '1234')
 
-// 로그인
+// 사용자 로그인
 await login('test@example.com', '1234')
+
+// 사용자 로그아웃
+logout()
+
+// 가입된 사용자 조회
+await getUser('test@example.com')
+
+// 가입된 사용자 삭제
+await deleteUser('test@example.com')
 
 // 할 일 추가
 await addTodo('공부하기')

@@ -13,6 +13,7 @@ app.use(cors())
 
 
 // --------------------------------------------------------------------------
+// 데이터베이스 구성
 
 // MongoDB 연결
 mongoose.connect(process.env.TODOLIST_DB)
@@ -37,8 +38,8 @@ const todoSchema = new mongoose.Schema({
 const Todo = mongoose.model('Todo', todoSchema)
 
 // --------------------------------------------------------------------------
-
 // JWT 인증 미들웨어
+
 const auth = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]
   
@@ -52,8 +53,9 @@ const auth = async (req, res, next) => {
   }
 }
 
+
 // --------------------------------------------------------------------------
-// 회원가입
+// 사용자 생성
 
 app.post('/register', async (req, res) => {
   const { email, password } = req.body
@@ -67,8 +69,60 @@ app.post('/register', async (req, res) => {
   }
 })
 
+
 // --------------------------------------------------------------------------
-// 로그인
+// 가입된 사용자 조회
+
+app.get('/users/:email', async (req, res) => {
+  try {
+    const { email } = req.params
+    const user = await User.findOne({ email })
+    
+    if (!user) {
+      return res.status(404).json({ message: MESSAGES.users.notFound })
+    }
+    
+    const userResponse = {
+      _id: user._id,
+      email: user.email
+    }
+    
+    res.json({ user: userResponse, message: MESSAGES.users.found })
+  } catch (error) {
+    res.status(500).json({ message: MESSAGES.users.error })
+  }
+})
+
+
+// --------------------------------------------------------------------------
+// 가입된 사용자 및 데이터 모두 삭제
+
+app.delete('/users/:email', async (req, res) => {
+  try {
+    const { email } = req.params
+    const user = await User.findOne({ email })
+    
+    if (!user) {
+      return res.status(404).json({ message: MESSAGES.users.notFound })
+    }
+    
+    await Todo.deleteMany({ userId: user._id })
+    await User.deleteOne({ _id: user._id })
+
+    const userResponse = {
+      _id: user._id,
+      email: user.email
+    }
+    
+    res.json({ deletedUser: userResponse, message: MESSAGES.users.deleted })
+  } catch (error) {
+    res.status(500).json({ message: MESSAGES.users.error })
+  }
+})
+
+
+// --------------------------------------------------------------------------
+// 사용자 로그인
 
 app.post('/login', async (req, res) => {
   const { email, password } = req.body
