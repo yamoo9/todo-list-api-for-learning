@@ -1,5 +1,5 @@
-// 실제 배포 주소로 변경
-const API_URL = 'https://your-app-url.onrender.com'
+// 배포 주소
+const API_URL = 'https://todo-list-api-for-learning.onrender.com'
 
 // 로그인 후 저장
 let token = null

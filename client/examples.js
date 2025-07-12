@@ -11,7 +11,7 @@ await addTodo('공부하기')
 const todos = await getTodos()
 console.log(todos)
 
-// 할 일 수정
+// 할 일 전체 수정
 if (todos.length > 0) {
   await updateTodo(todos[0]._id, '운동하기', true)
 }

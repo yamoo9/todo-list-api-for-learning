@@ -1,4 +1,5 @@
 require('dotenv').config()
+const MESSAGES = require('./config')
 
 const express = require('express')
 const mongoose = require('mongoose')
@@ -9,6 +10,7 @@ const cors = require('cors')
 const app = express()
 app.use(express.json())
 app.use(cors())
+
 
 // --------------------------------------------------------------------------
 
@@ -46,50 +48,48 @@ const auth = async (req, res, next) => {
     next()
   } catch {
     // Unauthorized
-    res.status(401).json({ message: '인증된 사용자가 아닙니다.' })
+    res.status(401).json({ message: MESSAGES.auth.unauthorized })
   }
 }
 
 // --------------------------------------------------------------------------
-
 // 회원가입
+
 app.post('/register', async (req, res) => {
   const { email, password } = req.body
   const hash = await bcrypt.hash(password, 10)
 
   try {
     const user = await User.create({ email, password: hash })
-    // Registered
-    res.json({ message: '가입에 성공했습니다.' })
+    res.json({ message: MESSAGES.register.success })
   } catch {
-    // Email already exists
-    res.status(400).json({ message: '이미 존재하는 이메일입니다.' })
+    res.status(400).json({ message: MESSAGES.register.failed })
   }
 })
 
 // --------------------------------------------------------------------------
-
 // 로그인
+
 app.post('/login', async (req, res) => {
   const { email, password } = req.body
   const user = await User.findOne({ email })
 
   // Invalid credentials
-  if (!user) return res.status(400).json({ message: '가입한 적 없는 사용자입니다.' })
+  if (!user) return res.status(400).json({ message: MESSAGES.login.failed.email })
   const valid = await bcrypt.compare(password, user.password)
 
-  if (!valid) return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' })
+  if (!valid) return res.status(400).json({ message: MESSAGES.login.failed.password })
   const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY)
 
-  res.json({ token, message: '성공적으로 로그인 되었습니다.' })
+  res.json({ token, message: MESSAGES.login.success })
 })
 
 // --------------------------------------------------------------------------
-
 // GET (인증 필요)
+
 app.get('/todos', auth, async (req, res) => {
   const todos = await Todo.find({ userId: req.user.id })
-  res.json(todos)
+  res.json({ todos, message: MESSAGES.get.message })
 })
 
 // --------------------------------------------------------------------------
@@ -101,7 +101,7 @@ app.post('/todos', auth, async (req, res) => {
     todo: req.body.todo,
     completed: false,
   })
-  res.json(todo)
+  res.json({ todo, message: MESSAGES.post.message })
 })
 
 // --------------------------------------------------------------------------
@@ -113,7 +113,7 @@ app.put('/todos/:id', auth, async (req, res) => {
     { todo: req.body.todo, completed: req.body.completed },
     { new: true }
   )
-  res.json(todo)
+  res.json({ todo, message: MESSAGES.put.message })
 })
 
 // --------------------------------------------------------------------------
@@ -125,7 +125,7 @@ app.patch('/todos/:id', auth, async (req, res) => {
     req.body,
     { new: true }
   )
-  res.json(todo)
+  res.json({ todo, message: MESSAGES.patch.message })
 })
 
 // --------------------------------------------------------------------------
@@ -133,10 +133,10 @@ app.patch('/todos/:id', auth, async (req, res) => {
 // DELETE (인증 필요)
 app.delete('/todos/:id', auth, async (req, res) => {
   await Todo.deleteOne({ _id: req.params.id, userId: req.user.id })
-  res.json({ message: '삭제되었습니다.' })
+  res.json({ deletedId: req.params.id, message: MESSAGES.delete.message })
 })
 
 // --------------------------------------------------------------------------
 
 // 서버 실행
-app.listen(3000, () => console.log('API 서버 시작'))
+app.listen(3000, () => console.log(MESSAGES.server.message))
